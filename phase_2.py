@@ -12,13 +12,27 @@ import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize, WordPunctTokenizer
 from nltk.stem import PorterStemmer
 
-df = pd.read_csv("Team 5 - Corpus.csv")
+CAT_NAMES  = {1: "News & Politics", 2: "CS & Data Science", 3: "Lit, Music & TV",
+              4: "Health & Fitness", 5: "Food, Home & Pets"}
 
-# Display the first few documents
-print(df.head())
+df = pd.read_csv("Team 5 - Corpus.csv")
+corpus = pd.DataFrame(df[['text', 'category_1', 'category_2', 'sentiment']])
+
+corpus.insert(0, "doc_id", range(1, len(corpus) + 1))
+corpus.to_csv("demo_corpus.csv", index=False)          # same format as your Google Sheet export
+print(f"Saved {len(corpus)} documents to demo_corpus.csv")
+
+df["category_2"] = df["category_2"].astype(str)    # "none" or "1"–"5"
+df["category"]   = df["category_1"].map(CAT_NAMES) # readable name of the main category
+df["type"]       = np.where(df["category_2"] == "none", "Single", "Mixed")
+df["n_words"]    = df["text"].str.split().str.len()
 
 # Check the number of documents
 print("Number of documents:", len(df))
+
+# Display the first few documents
+df.head(8)
+
 
 
 def show_tokens(tokens, color="steelblue"):
