@@ -50,3 +50,57 @@ for s in sent_tokenize(raw):
     print("   •", s)
 print("\nWORDS :")
 show_tokens(word_tokenize(raw))
+
+
+STOP_WORDS = ENGLISH_STOP_WORDS
+stemmer = PorterStemmer()
+
+def preprocess(text, stem=False):
+    if pd.isna(text):
+        return []
+
+    tokens = re.findall(r"[a-z]+", str(text).lower())
+    tokens = [t for t in tokens if t not in STOP_WORDS and len(t) > 1]
+
+    if stem:
+        tokens = [stemmer.stem(t) for t in tokens]
+
+    return tokens
+
+df["tokens"] = df["text"].apply(preprocess)
+df["clean"]  = df["tokens"].str.join(" ")        # cleaned text, ready for vectorizers
+
+example = df.loc[60, "text"]
+print("Original :", example)
+show_tokens(preprocess(example))
+show_tokens(preprocess(example, stem=True), color="blue")
+
+
+# How much does each step shrink the vocabulary?
+all_text = " ".join(df["text"].dropna().astype(str))
+
+steps = {
+    "raw split()":         set(all_text.split()),
+    "lowercase + letters": set(re.findall(r"[a-z]+", all_text.lower())),
+    "– stop words":        {t for toks in df.tokens for t in toks},
+    "+ stemming":          {t for txt in df.text for t in preprocess(txt, stem=True)},
+}
+
+sizes = pd.Series({k: len(v) for k, v in steps.items()})
+
+ax = sizes.plot.bar(color=["paleturquoise", "turquoise", "teal", "darkslategray"], rot=0, width=0.65, figsize=(8, 4))
+for i, v in enumerate(sizes):
+    ax.text(i, v + 8, v, ha="center", fontweight="bold")
+
+ax.set_title("Unique words (= features) after each preprocessing step")
+ax.set_ylabel("vocabulary size")
+plt.show()
+
+freq = Counter(t for toks in df.tokens for t in toks)
+top = pd.Series(dict(freq.most_common(15)))
+
+ax = top[::-1].plot.barh(color="navy", figsize=(8, 5))
+ax.set_title("15 most frequent words (after cleaning)"); ax.set_xlabel("count")
+for i, v in enumerate(top[::-1]):
+    ax.text(v + 0.1, i, v, va="center", fontsize=9)
+plt.show()
