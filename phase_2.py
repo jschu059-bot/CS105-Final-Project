@@ -12,6 +12,9 @@ import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize, WordPunctTokenizer
 from nltk.stem import PorterStemmer
 
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, ENGLISH_STOP_WORDS
+from sklearn.metrics.pairwise import cosine_similarity
+
 CAT_NAMES  = {1: "News & Politics", 2: "CS & Data Science", 3: "Lit, Music & TV",
               4: "Health & Fitness", 5: "Food, Home & Pets"}
 
