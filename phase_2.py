@@ -18,7 +18,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 CAT_NAMES  = {1: "News & Politics", 2: "CS & Data Science", 3: "Lit, Music & TV",
               4: "Health & Fitness", 5: "Food, Home & Pets"}
 
-df = pd.read_csv("Team 5 - Corpus.csv")
+df = pd.read_excel("Team 5.xlsx", sheet_name="Corpus")
 corpus = pd.DataFrame(df[['text', 'category_1', 'category_2', 'sentiment']])
 
 corpus.insert(0, "doc_id", range(1, len(corpus) + 1))
@@ -107,3 +107,22 @@ ax.set_title("15 most frequent words (after cleaning)"); ax.set_xlabel("count")
 for i, v in enumerate(top[::-1]):
     ax.text(v + 0.1, i, v, va="center", fontsize=9)
 plt.show()
+
+bow_vectorizer = CountVectorizer()
+x_bow = bow_vectorizer.fit_transform(df["clean"])
+bow_df = pd.DataFrame(x_bow.toarray(), columns = bow_vectorizer.get_feature_names_out())
+print("Bow Matrix Shape: ",x_bow.shape)
+display(bow_df.head())
+
+tfidf_vectorizer = TfidfVectorizer();
+x_tfidf = tfidf_vectorizer.fit_transform(df["clean"])
+
+tfidf_df = pd.DataFrame(x_tfidf.toarray(),columns=tfidf_vectorizer.get_feature_names_out())
+print("TF-IDF Matrix Shape:", x_tfidf.shape)
+display(tfidf_df.head())
+binary_vectorizer = CountVectorizer(binary=True)
+x_binary = binary_vectorizer.fit_transform(df["clean"])
+print("Binary Matrix Shape:", x_binary.shape)
+
+
+
